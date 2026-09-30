@@ -59,6 +59,22 @@ class Perceptron(object):
 	#
 	# Returns:	no return value
 	def train(self, training_set, learning_rate_parameter, number_of_epochs):
+		n = len(training_set[0]) - 1
+		self.synaptic_weights = np.zeros(n)
+		for epoch in range(number_of_epochs):
+			for row in training_set:
+				# x
+				inputs = row[:-1]
+				# y-hat
+				expected_output = row[-1]
+				# y = w * x + b
+				output = self.predict(inputs)
+				# calculate loss
+				error = expected_output - output
+				# apply learning adjusted by signal and error
+				for i in range(n):
+					self.synaptic_weights[i] += learning_rate_parameter * error * inputs[i]
+				self.bias += learning_rate_parameter * error
 		return
 
 	# Test this Perceptron
