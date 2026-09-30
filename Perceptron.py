@@ -1,3 +1,5 @@
+import numpy as np
+
 class Perceptron(object):
 
 	# Create a new Perceptron
@@ -19,6 +21,7 @@ class Perceptron(object):
 	#
 	# Returns:	an integer that corresponds to one of the two possible output values (usually 0 or 1)
 	def activation_function(self, z):
+		return 1 if z >= 0 else 0
 
 
 	# Compute and return the weighted sum of all inputs (not including bias)
@@ -28,7 +31,7 @@ class Perceptron(object):
 	# Returns:	a float value equal to the sum of each input multiplied by its
 	#			corresponding synaptic weight
 	def weighted_sum_inputs(self, inputs):
-		
+		return np.dot(inputs, self.synaptic_weights)
 
 	# Compute the induced local field (the weighted sum of the inputs + the bias)
 	#
@@ -36,7 +39,7 @@ class Perceptron(object):
 	#
 	# Returns:	the sum of the weighted inputs adjusted by the bias
 	def induced_local_field(self, inputs):
-
+		return inputs + self.bias
 
 	# Predict the output for the specified input vector
 	#
@@ -45,7 +48,7 @@ class Perceptron(object):
 	# Returns:	an integer value representing the final output, which must be one of the two
 	#			possible output values (usually 0 or 1)
 	def predict(self, input_vector):
-
+		return self.activation_function(self.induced_local_field(self.weighted_sum_inputs(input_vector)))
 
 	# Train this Perceptron
 	#
@@ -56,11 +59,14 @@ class Perceptron(object):
 	#
 	# Returns:	no return value
 	def train(self, training_set, learning_rate_parameter, number_of_epochs):
-
+		return
 
 	# Test this Perceptron
 	# Params:	test_set - the set of input vectors to be used to test the perceptron after it has been trained
 	#
 	# Returns:	a collection or list containing the actual output (i.e., prediction) for each input vector
 	def test(self, test_set):
-            
+		# feed each input list into the perceptron
+		# remove each last element representing the expected output label
+		return [self.predict(t) for t in test_set[:, :-1]]
+                
