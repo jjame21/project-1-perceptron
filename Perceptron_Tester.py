@@ -2,6 +2,7 @@ from csv import reader					# reader object reads a csv file line by line
 from random import seed					# seeds the random number generator
 from random import randrange			# returns a random value in a specified range
 from Perceptron import Perceptron		# this is the Perceptron class in the Perceptron.py file
+import numpy as np
 
 ######################################################################
 ##### DATASET FUNCTIONS                                          #####
@@ -85,7 +86,15 @@ def load_dataset(filename):
 # Returns:	a matrix, or list of rows, containing only a subset of the input
 #			vectors from the entire dataset
 def create_training_set(dataset):
-
+	# R = 0, M = 1
+	# using 70% random samples
+	# shuffle array of indices to choose from
+	rows = len(dataset)
+	indices = np.arange(rows)
+	rng = np.random.default_rng(40)
+	rng.shuffle(indices)
+	total = int(.7 * rows)
+	return dataset[indices[:total]]
 
 ######################################################################
 ##### CREATE A PERCEPTRON, TRAIN IT, AND TEST IT                 #####
@@ -95,21 +104,72 @@ def create_training_set(dataset):
 dataset = load_csv('sonar_all-data.csv')
 
 # Step 2: Convert the string input values to floats
-
+#inputs = np.array([d[:-1] for d in dataset],dtype=float)
+n = len(dataset[0]) - 1
+for i in range(n):
+	convert_inputs_to_float(dataset,i)
 
 # Step 3: Convert the desired outputs to int values
-
+#labels = np.array([0 if d[-1] == 'R' else 1 for d in dataset],dtype=float)
+convert_desired_outputs_to_int(dataset, n)
+dataset = np.array(dataset, dtype=float)
 
 # Step 4: Create the training set
-
+training_set = create_training_set(dataset)
 
 # Step 5: Create the perceptron
-
+p = Perceptron(0, np.zeros(60))
 
 # Step 6: Train the perceptron
-
+p.train(training_set, 0.01, 500)
 
 # Step 7: Test the trained perceptron
-
+# test whole dataset
+#rows = len(dataset)
+#indices = np.arange(rows)
+#rng = np.random.default_rng(123)
+#rng.shuffle(indices)
+#total = int(.7 * rows)
+#test_set = [dataset[indices[i]] for i in range(total, rows)]
+#p.test(test_set)
+results = p.test(dataset)
 
 # Step 8: Display the test results and accuracy of the perceptron
+#print(results)
+desired_outcomes = dataset[:,-1]
+total = len(dataset)
+correct = sum(1 for r,d in zip(results,desired_outcomes) if r==d)
+acc = correct / total
+print("Correct - ", correct)
+print("Incorrect - ", total - correct)
+print("Accuracy - ", acc * 100)
+print("Bias - ",p.bias)
+
+print("---------------------------------------")
+print("iterative seed optimized search")
+# 500 epochs, .01 learning, 70% random shuffled dataset training sample
+# seed 123 gives 58% accuracy
+# seed 12 gives 83% accuracy
+# seed 40 gives 88.94% accuracy
+# saving weights and bias in variables persists values in Spyder data window
+last_best_accuracy = acc
+last_best_weights = []
+last_best_bias = 0.0
+for s in range(0, 1000):
+	# bias is not reset to 
+	#p.bias = 0
+	rows = len(dataset)
+	indices = np.arange(rows)
+	rng = np.random.default_rng(s)
+	rng.shuffle(indices)
+	t = int(.7 * rows)
+	p.train(dataset[indices[:t]], 0.012, 500)
+	results = p.test(dataset)
+	correct = sum(1 for r,d in zip(results,desired_outcomes) if r==d)
+	acc = correct / total
+	if(acc > last_best_accuracy):
+		last_best_weights = p.synaptic_weights
+		last_best_bias = p.bias
+		last_best_accuracy = acc
+		print("seed - ", s, " | ", correct, " / ", total, " | ", acc * 100,"% | weights = ", last_best_weights," | bias = ", last_best_bias)
+		

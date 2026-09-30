@@ -21,6 +21,7 @@ class Perceptron(object):
 	#
 	# Returns:	an integer that corresponds to one of the two possible output values (usually 0 or 1)
 	def activation_function(self, z):
+		# R = 0, M = 1
 		return 1 if z >= 0 else 0
 
 
