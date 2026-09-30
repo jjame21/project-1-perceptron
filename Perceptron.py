@@ -76,7 +76,8 @@ class Perceptron(object):
 				for i in range(n):
 					self.synaptic_weights[i] += learning_rate_parameter * error * inputs[i]
 				self.bias += learning_rate_parameter * error
-			np.random.shuffle(training_set)
+			rng = np.random.default_rng(epoch)
+			rng.shuffle(training_set)
 		return
 
 	# Test this Perceptron
