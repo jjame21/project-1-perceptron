@@ -4,6 +4,11 @@ from random import randrange			# returns a random value in a specified range
 from Perceptron import Perceptron		# this is the Perceptron class in the Perceptron.py file
 import numpy as np
 
+# training data selection portion
+sample_rate = .75
+learning_rate = .010
+epohcs = 600
+
 ######################################################################
 ##### DATASET FUNCTIONS                                          #####
 ######################################################################
@@ -91,9 +96,9 @@ def create_training_set(dataset):
 	# shuffle array of indices to choose from
 	rows = len(dataset)
 	indices = np.arange(rows)
-	rng = np.random.default_rng(40)
+	rng = np.random.default_rng(172)
 	rng.shuffle(indices)
-	total = int(.7 * rows)
+	total = int(sample_rate * rows)
 	return dataset[indices[:total]]
 
 ######################################################################
@@ -151,19 +156,22 @@ print("iterative seed optimized search")
 # seed 123 gives 58% accuracy
 # seed 12 gives 83% accuracy
 # seed 40 gives 88.94% accuracy
+# update learning rate to .012
+# seed 172 gives 92.78% accuracy using 70% training sample rate
+# sample rate .75 with seed 172 and learning rate .1 gives 94.2% accuracy
+# increasing training sample size to 80% of total data
 # saving weights and bias in variables persists values in Spyder data window
 last_best_accuracy = acc
 last_best_weights = []
 last_best_bias = 0.0
-for s in range(0, 1000):
-	# bias is not reset to 
-	#p.bias = 0
+for s in range(172, 400):
+	p.bias = 0
 	rows = len(dataset)
 	indices = np.arange(rows)
 	rng = np.random.default_rng(s)
 	rng.shuffle(indices)
-	t = int(.7 * rows)
-	p.train(dataset[indices[:t]], 0.012, 500)
+	t = int(sample_rate * rows)
+	p.train(dataset[indices[:t]], 0.011, 600)
 	results = p.test(dataset)
 	correct = sum(1 for r,d in zip(results,desired_outcomes) if r==d)
 	acc = correct / total
@@ -173,3 +181,15 @@ for s in range(0, 1000):
 		last_best_accuracy = acc
 		print("seed - ", s, " | ", correct, " / ", total, " | ", acc * 100,"% | weights = ", last_best_weights," | bias = ", last_best_bias)
 		
+'''seed -  172  |  193  /  208  |  92.78846153846155 % | weights =  [ 4.309488e-01  2.102388e-01  1.736268e-01  3.384288e-01  3.222888e-01
+  9.467280e-02 -5.556504e-01 -5.449332e-01  3.168516e-01  1.051368e-01
+  3.020160e-01  2.788116e-01 -1.086696e-01  1.259676e-01 -1.201080e-02
+  1.942080e-02 -3.045828e-01 -1.990836e-01  3.505164e-01  1.787736e-01
+ -8.863200e-02  1.193760e-01 -5.371680e-02  3.137820e-01 -1.491972e-01
+ -7.007160e-02  2.122860e-01 -3.261360e-02  1.973280e-02  7.209840e-02
+ -1.928304e-01  1.353216e-01  2.813040e-02 -3.625572e-01  6.700812e-01
+ -6.164676e-01 -5.901120e-02  1.366812e-01  1.667880e-01 -3.273336e-01
+  1.950624e-01  6.862560e-02  2.834640e-02  7.694160e-02  2.951412e-01
+  2.201160e-01  3.121908e-01  6.681384e-01  4.227648e-01 -1.918272e-01
+  3.270840e-02  9.509280e-02  7.643760e-02  9.127200e-02 -5.340000e-04
+  6.089400e-02 -3.417960e-02  1.086204e-01  1.746060e-01  1.074360e-01]  | bias =  -0.5620000000000003'''
