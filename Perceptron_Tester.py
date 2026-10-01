@@ -52,7 +52,7 @@ def convert_desired_outputs_to_int(dataset, column):
 	class_values = [row[column] for row in dataset]
 
 	# Create a set containing only the unique values
-	unique = set(class_values)
+	unique = sorted(set(class_values))
 
 	# Create a lookup table to map each unique value to an integer (either 0 or 1)
 	lookup = dict()
