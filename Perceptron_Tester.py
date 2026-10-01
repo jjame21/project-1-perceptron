@@ -5,9 +5,11 @@ from Perceptron import Perceptron		# this is the Perceptron class in the Percept
 import numpy as np
 
 # training data selection portion
-sample_rate = .75
-learning_rate = .010
-epohcs = 600
+sample_rate = .85
+learning_rate = .001
+epochs = 1200
+bias = -0.4
+start_seed = 172
 
 ######################################################################
 ##### DATASET FUNCTIONS                                          #####
@@ -92,11 +94,11 @@ def load_dataset(filename):
 #			vectors from the entire dataset
 def create_training_set(dataset):
 	# R = 0, M = 1
-	# using 70% random samples
+	# using random samples
 	# shuffle array of indices to choose from
 	rows = len(dataset)
 	indices = np.arange(rows)
-	rng = np.random.default_rng(172)
+	rng = np.random.default_rng(start_seed)
 	rng.shuffle(indices)
 	total = int(sample_rate * rows)
 	return dataset[indices[:total]]
@@ -123,10 +125,10 @@ dataset = np.array(dataset, dtype=float)
 training_set = create_training_set(dataset)
 
 # Step 5: Create the perceptron
-p = Perceptron(0, np.zeros(60))
+p = Perceptron(bias, np.zeros(60))
 
 # Step 6: Train the perceptron
-p.train(training_set, 0.01, 500)
+p.train(training_set, learning_rate, epochs)
 
 # Step 7: Test the trained perceptron
 # test whole dataset
@@ -149,37 +151,40 @@ print("Correct - ", correct)
 print("Incorrect - ", total - correct)
 print("Accuracy - ", acc * 100)
 print("Bias - ",p.bias)
+print("seed - ", start_seed, " | ", correct, "/", total, " | ", acc * 100,"% | weights = ", p.synaptic_weights," | bias = ", p.bias)
 
 print("---------------------------------------")
-print("iterative seed optimized search")
+print("iterating selection & shuffling seeds")
 # 500 epochs, .01 learning, 70% random shuffled dataset training sample
 # seed 123 gives 58% accuracy
 # seed 12 gives 83% accuracy
 # seed 40 gives 88.94% accuracy
 # update learning rate to .012
 # seed 172 gives 92.78% accuracy using 70% training sample rate
-# sample rate .75 with seed 172 and learning rate .1 gives 94.2% accuracy
+# sample rate .75 with seed 172 and learning rate .1 gives 94.2% accuracy without deterministic inter-epoch shuffling
+# seed 172 with .68 sample portion with .1 learning rate and 500 epochs gives 93.26% accuracy
 # increasing training sample size to 80% of total data
 # saving weights and bias in variables persists values in Spyder data window
 last_best_accuracy = acc
-last_best_weights = []
-last_best_bias = 0.0
-for s in range(172, 400):
-	p.bias = 0
+last_best_weights = p.synaptic_weights
+last_best_bias = p.bias
+for s in range(0, 200):
+	# reset bias
+	p.bias = bias
 	rows = len(dataset)
 	indices = np.arange(rows)
 	rng = np.random.default_rng(s)
 	rng.shuffle(indices)
 	t = int(sample_rate * rows)
-	p.train(dataset[indices[:t]], 0.011, 600)
+	p.train(dataset[indices[:t]], learning_rate, epochs)
 	results = p.test(dataset)
 	correct = sum(1 for r,d in zip(results,desired_outcomes) if r==d)
 	acc = correct / total
 	if(acc > last_best_accuracy):
-		last_best_weights = p.synaptic_weights
+		last_best_weights = p.synaptic_weights.copy()
 		last_best_bias = p.bias
 		last_best_accuracy = acc
-		print("seed - ", s, " | ", correct, " / ", total, " | ", acc * 100,"% | weights = ", last_best_weights," | bias = ", last_best_bias)
+		print("seed - ", s, " | ", correct, "/", total, " | ", acc * 100,"% | weights = ", last_best_weights," | bias = ", last_best_bias)
 		
 '''seed -  172  |  193  /  208  |  92.78846153846155 % | weights =  [ 4.309488e-01  2.102388e-01  1.736268e-01  3.384288e-01  3.222888e-01
   9.467280e-02 -5.556504e-01 -5.449332e-01  3.168516e-01  1.051368e-01
